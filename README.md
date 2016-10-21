@@ -1,4 +1,4 @@
-# awakening-nginx-rtmp
+# robtimmer-nginx-rtmp
 
 Live streaming video server for Flash, iOS and Android
 
@@ -17,8 +17,8 @@ This image exposes ports `80` for HTTP and `1935` for RTMP.
 ### Example
 
     docker run -e PUBLISH_SECRET=VERY_SECRET_KEY
-               -e CORS_HTTP_ORIGIN='(https?://[^/]*\.awakeningchurch\.com(:[0-9]+)?)'
-               -p 80:80 -p 1935:1935 awakening/awakening-nginx-rtmp
+               -e CORS_HTTP_ORIGIN='(https?://[^/]*\.robtimmer\.com(:[0-9]+)?)'
+               -p 80:80 -p 1935:1935 robtimmer/nginx-rtmp
 
 
 ## Publish URL

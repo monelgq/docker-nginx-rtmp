@@ -1,22 +1,26 @@
-FROM ubuntu:14.04
+FROM ubuntu:latest
 MAINTAINER rob@robtimmer.com
 
+# Install dependencies
 RUN apt-get -q -y update \
     && apt-get -q -y install cron logrotate make build-essential libssl-dev \
         zlib1g-dev libpcre3 libpcre3-dev curl pgp yasm \
     && apt-get -q -y build-dep nginx \
     && apt-get -q -y clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
+# Download, compile and install fdk library
 RUN cd /root \
     && curl -L https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.4.tar.gz > fdk-aac.tgz \
     && mkdir fdk-aac && tar xzf fdk-aac.tgz -C fdk-aac --strip 1 && cd fdk-aac \
     && ./configure && make install
 
+# Download, compile and install x264 library
 RUN cd /root \
     && curl -L ftp://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20160225-2245.tar.bz2 > x264.tar.bz2 \
     && mkdir x264 && tar xjf x264.tar.bz2 -C x264 --strip 1 && cd x264 \
     && ./configure --enable-static && make install
 
+# Download, compile and install libab library
 RUN cd /root \
     && curl -L https://libav.org/releases/libav-11.4.tar.gz > libav.tgz \
     && mkdir libav && tar xzf libav.tgz -C libav --strip 1 && cd libav \
@@ -24,15 +28,21 @@ RUN cd /root \
         --enable-libfdk-aac --enable-libx264 \
     && make install
 
+# Add new group and user, nginx specific
 RUN groupadd nginx
 RUN useradd -m -g nginx nginx
+
+# Create log and caching directory
 RUN mkdir -p /var/log/nginx /var/cache/nginx
 
+# Download and extract/ install nginx rtmp module
 RUN cd /root && curl -L https://github.com/arut/nginx-rtmp-module/archive/v1.1.7.tar.gz > nginx-rtmp.tgz \
     && mkdir nginx-rtmp && tar xzf nginx-rtmp.tgz -C nginx-rtmp --strip 1 
 
+# Handle info and stats file structure
 RUN mkdir /www && cp /root/nginx-rtmp/stat.xsl /www/info.xsl && chown -R nginx:nginx /www
 
+# Download, compile and install nginx server
 RUN cd /root \
     && curl -L -O http://nginx.org/download/nginx-1.8.1.tar.gz \
     && curl -L -O http://nginx.org/download/nginx-1.8.1.tar.gz.asc \
@@ -74,18 +84,20 @@ RUN cd /root \
         --with-ipv6 \
    && make install
 
+# Run ldconfig
 RUN ldconfig
 
+# Expose required ports
 EXPOSE 80
 EXPOSE 1935
 
+# Add scripts and base nginx configuration template
 RUN mkdir -p /etc/nginx/templates
-
 ADD sbin/substitute-env-vars.sh /usr/sbin/substitute-env-vars.sh
 ADD sbin/render-templates.sh /usr/sbin/render-templates.sh
 ADD sbin/entrypoint.sh /usr/sbin/entrypoint.sh
-
 ADD templates/nginx.conf.tmpl /etc/nginx/templates/nginx.conf.tmpl
 
+# Start the nginx server, with generated configuration (by entrypoint)
 ENTRYPOINT ["/usr/sbin/entrypoint.sh"]
 CMD ["/usr/sbin/nginx", "-c", "/etc/nginx/nginx.conf"]

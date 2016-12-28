@@ -154,9 +154,7 @@ rtmp {
             deny play all;
 
             exec_push /usr/local/bin/avconv -i rtmp://localhost/pub_${PUBLISH_SECRET}/$name
-                -filter:v scale=-1:460
-                -c:a libfdk_aac -b:a 32k  -c:v libx264 -b:v 128k  -f flv rtmp://localhost/hls/$name_128
-                -c:a libfdk_aac -b:a 128k -c:v libx264 -b:v 512k  -f flv rtmp://localhost/hls/$name_512;
+                -c:a libfdk_aac -b:a 128k -c:v libx264 -b:v 512k -preset baseline -preset ultrafast -tune fastdecode -f flv rtmp://localhost/hls/$name_512;               
         }
 
         application player {

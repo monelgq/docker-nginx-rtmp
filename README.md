@@ -1,6 +1,6 @@
 # robtimmer-nginx-rtmp
 
-Live streaming video server for Flash, iOS and Android
+Nginx server, configurated with rtmp-module for streaming
 
 ## Usage
 

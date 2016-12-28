@@ -47,7 +47,3 @@ You can visit these protected resources by visiting `/p/{token}/{resource-name}`
 ```
 echo -n '{resource-name}{PUBLISH_SECRET}' | openssl md5 -hex
 ```
-
-## License
-
-MIT, see LICENSE file.
